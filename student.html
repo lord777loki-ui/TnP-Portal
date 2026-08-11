@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Dashboard</title>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; }
+      table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+      th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+      .btn { margin-top: 16px; padding: 10px 14px; cursor: pointer; }
+      .err { color: crimson; }
+    </style>
+  </head>
+  <body>
+    <h2>Student Dashboard</h2>
+    <div id="status"></div>
+    <div id="err" class="err"></div>
+
+    <div style="margin-top: 12px;">
+      <button class="btn" id="logoutBtn">Logout</button>
+    </div>
+
+    <table id="profileTable">
+      <tbody></tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
