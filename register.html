@@ -1,0 +1,88 @@
+<script type="module">
+  import { auth, db } from "./js/firebase-config.js";
+  import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+  import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+  const $ = (s) => document.querySelector(s);
+  const toast = $("#toast");
+
+  function showToast(msg, type="success") {
+    toast.textContent = msg;
+    toast.className = `toast ${type}`;
+    setTimeout(() => toast.classList.add("hide"), 2200);
+  }
+
+  function validateForm(data) {
+    if (!data.password || data.password.length < 6) return "Password must be at least 6 characters.";
+    if (data.password !== data.confirmPassword) return "Passwords do not match.";
+
+    const t10 = Number(data.tenthPercentage);
+    const t12 = Number(data.twelfthPercentage);
+    if (Number.isNaN(t10) || t10 < 0 || t10 > 100) return "10th Percentage must be between 0 and 100.";
+    if (Number.isNaN(t12) || t12 < 0 || t12 > 100) return "12th Percentage must be between 0 and 100.";
+
+    const cgpa = Number(data.cgpa);
+    if (Number.isNaN(cgpa) || cgpa < 0 || cgpa > 10) return "CGPA must be between 0 and 10.";
+
+    const backlogs = Number(data.backlogs);
+    if (Number.isNaN(backlogs) || backlogs < 0) return "Backlogs must be 0 or greater.";
+
+    return null;
+  }
+
+  $("#registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form).entries());
+    const error = validateForm(data);
+    if (error) return showToast(error, "error");
+
+    try {
+      showToast("Creating account...", "info");
+
+      const userCred = await createUserWithEmailAndPassword(
+        auth,
+        data.email.trim(),
+        data.password
+      );
+
+      const uid = userCred.user.uid;
+
+      const skills = data.skills
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      await setDoc(doc(db, "students", uid), {
+        fullName: data.fullName.trim(),
+        rollNumber: data.rollNumber.trim(),
+        email: data.email.trim(),
+        mobile: data.mobile.trim(),
+        branch: data.branch.trim(),
+        semester: Number(data.semester),
+        section: data.section.trim(),
+        dateOfBirth: data.dateOfBirth,
+        gender: data.gender,
+
+        tenthPercentage: Number(data.tenthPercentage),
+        twelfthPercentage: Number(data.twelfthPercentage),
+        cgpa: Number(data.cgpa),
+        backlogs: Number(data.backlogs),
+
+        skills,
+
+        placementStatus: "Not Applied",
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      showToast("Registered successfully! Redirecting...", "success");
+      setTimeout(() => { window.location.href = "student/dashboard.html"; }, 800);
+
+    } catch (err) {
+      console.error(err);
+      showToast(err.message || "Registration failed.", "error");
+    }
+  });
+</script>
